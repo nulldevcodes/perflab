@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pro Website Performance Analyzer</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect width='32' height='32' rx='6' fill='%232dd4bf'/><text x='50%' y='58%' font-size='18' text-anchor='middle' font-family='Arial' fill='%23020a0f'>W</text></svg>" alt="logo">
+        <div>
+          <h1>PerfLab</h1>
+          <small>Website Performance Analyzer</small>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label>Mode</label>
+        <select id="mode">
+          <option value="current">Analyze Current Page (recommended)</option>
+          <option value="external">External URL (proxy)</option>
+        </select>
+
+        <div id="urlRow" class="url-row hidden">
+          <input id="urlInput" placeholder="https://example.com" />
+        </div>
+
+        <div class="buttons">
+          <button id="analyzeBtn" class="primary">Run Analysis</button>
+          <button id="clearBtn" class="ghost">Reset</button>
+        </div>
+
+        <div class="extras">
+          <label><input type="checkbox" id="collectLongTasks" checked> Collect Long Tasks</label>
+          <label><input type="checkbox" id="includeResources" checked> Include Resources</label>
+        </div>
+
+        <div class="status" id="status">Ready</div>
+
+        <div class="export">
+          <button id="exportJson" class="ghost">Export JSON</button>
+          <button id="exportCsv" class="ghost">Export CSV</button>
+        </div>
+
+        <div class="footer-note">
+          <p>Tip: open this analyzer on the site you want to measure for most accurate same-origin timings. External scans use a public proxy (may fail).</p>
+          <button id="themeToggle" class="ghost">Toggle Theme</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="overview card" id="summaryCard" aria-hidden="true">
+        <div class="summary-header">
+          <h2>Summary</h2>
+          <div class="meta" id="metaTitle">—</div>
+        </div>
+
+        <div class="summary-grid">
+          <div class="stat">
+            <div class="label">URL</div>
+            <div id="summaryUrl" class="mono">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">Total Requests</div>
+            <div id="summaryReqs">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">Total Transfer</div>
+            <div id="summaryBytes">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">TTFB (ms)</div>
+            <div id="summaryTTFB">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">LCP (ms)</div>
+            <div id="summaryLCP">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">CLS</div>
+            <div id="summaryCLS">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">FID (ms)</div>
+            <div id="summaryFID">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">Long Tasks</div>
+            <div id="summaryLongTasks">—</div>
+          </div>
+        </div>
+
+        <div id="scoreWrap">
+          <div class="scoreLabel">Performance Score</div>
+          <div class="score" id="perfScore">—</div>
+        </div>
+
+        <div id="suggestions" class="suggestions"></div>
+      </section>
+
+      <section class="charts card hidden" id="chartsCard">
+        <div class="chart-row">
+          <div class="chart-card">
+            <h3>Cumulative Transfer Over Time</h3>
+            <canvas id="cumBytesChart" height="140"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <h3>Top Slow Resources</h3>
+            <canvas id="topSlowChart" height="140"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-card">
+            <h3>Resource Type Distribution</h3>
+            <canvas id="typePieChart" height="140"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <h3>Protocols (HTTP/1.1, h2, h3)</h3>
+            <canvas id="protocolChart" height="140"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="waterfall card hidden" id="waterfallCard">
+        <h3>Waterfall (start time & duration)</h3>
+        <div id="waterfallWrap"></div>
+      </section>
+
+      <section class="resources card hidden" id="resourcesCard">
+        <div class="res-tools">
+          <input id="searchResource" placeholder="Search resources..." />
+          <div>
+            <button id="copyUrls" class="ghost">Copy URLs</button>
+          </div>
+        </div>
+
+        <table id="resourcesTable" class="res-table">
+          <thead><tr>
+            <th>#</th><th>URL</th><th>Type</th><th>Protocol</th><th>Start (ms)</th><th>Duration (ms)</th><th>Size (KB)</th><th>DNS/TCP/SSL/Req/Res (ms)</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="raw card hidden" id="rawCard">
+        <h3>Raw Report (JSON)</h3>
+        <pre id="rawOut">{ }</pre>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
